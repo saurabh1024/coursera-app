@@ -1,5 +1,6 @@
 # Dependencies (always exclude; reinstall via npm install)
 node_modules/
+.package-lock.json
 
 # Environment variables & secrets
 .env

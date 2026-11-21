@@ -1,17 +1,9 @@
-import 'dotenv/config';
 import { Router } from "express";
 import { userModel } from "../db.js";
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-const JWT_SECRET = process.env.JWT_SECRET_USER
+import { userAuth } from "../middlewares/user.js";
 export const userRouter = Router()
-
-function auth(req, res, next){
-    const token = req.headers.token
-    const tokenDecoded = jwt.verify(token, JWT_SECRET)
-    req.userId = tokenDecoded.userId
-    next()
-}
 
 userRouter.post('/signup', async (req, res)=>{
     const { email, password, firstName, lastName } = req.body
@@ -45,21 +37,20 @@ userRouter.post('/signin', async (req, res)=>{
                if(isMatch){
                    const token = jwt.sign({
                        userId: adminDetails._userId
-                   }, JWT_SECRET)
+                   }, process.env.JWT_SECRET_USER)
                    res.json({token: token})
                } else {
-                   res.json({
-                       message: "Incorrect Password!"
-                   })
+                   throw new Error("Incorrect Password!")
                }
            } catch( error ) {
            res.json({
-               error: error
+                message: "Something went wrong!",
+                error: error
            })
     }
 })
 
-userRouter.get('/purchases', auth, (req, res)=>{
+userRouter.get('/purchases', userAuth, (req, res)=>{
     res.json({
         message: "Get Purchaces endpoint"
     })
